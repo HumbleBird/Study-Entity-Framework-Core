@@ -32,8 +32,6 @@ namespace MMO_EFCore
             var Faker = new Player(){ Name = "Faker" };
             var deft = new Player(){ Name = "Deft" };
 
-            Console.WriteLine(db.Entry(Rookiss).State);
-
             List<Item> items = new List<Item>()
             {
                 new Item()
@@ -65,12 +63,21 @@ namespace MMO_EFCore
             db.Items.AddRange(items);
             db.Guilds.Add(guild);
 
-            Console.WriteLine(db.Entry(Rookiss).State);
 
             db.SaveChanges();
 
-            Console.WriteLine(db.Entry(Rookiss).State);
         }
 
+        public static void UpdateTest()
+        {
+            using (AppDbContext db = new AppDbContext())
+            {
+                var guild = db.Guilds.Single(g => g.GuildName == "T1");
+
+                guild.GuildName = "DWM";
+
+                db.SaveChanges();
+            }
+        }
     }
 }
