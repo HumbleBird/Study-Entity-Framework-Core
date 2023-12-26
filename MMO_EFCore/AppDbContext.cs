@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MMO_EFCore
 {
-    internal class AppDbContext : DbContext
+    public class AppDbContext : DbContext
     {
         // DbSet<Item> -> EF Core한테 알려준다.
         public DbSet<Item> Items { get; set; }
