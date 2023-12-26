@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace MMO_EFCore
@@ -68,15 +70,61 @@ namespace MMO_EFCore
 
         }
 
-        public static void UpdateTest()
+        public static void UpdateReload()
+        {
+            ShowGuilds();
+
+            Console.WriteLine("Input GuildId");
+            Console.WriteLine(" > ");
+            int id = int.Parse(Console.ReadLine());
+
+            Console.WriteLine("Input GuildName");
+            Console.WriteLine(" > ");
+            string name = Console.ReadLine();
+
+            using (AppDbContext db = new AppDbContext())
+            {
+                Guild guild = db.Find<Guild>(id);
+                guild.GuildName = name;
+
+                db.SaveChanges();
+            }
+            Console.WriteLine("Update cop");
+
+            ShowGuilds();
+        }
+
+        public static string MakeUpdateJsonStr()
+        {
+            var jsonStr = "{\"GuildId\":1, \"GuildName\":\"Hellow\", \"Members\":null}";
+            return jsonStr;
+        }
+
+        public static void UpdateFull()
+        {
+            ShowGuilds();
+
+            string jsonStr = MakeUpdateJsonStr();
+            Guild guild = JsonConvert.DeserializeObject<Guild>(jsonStr);
+            using (AppDbContext db = new AppDbContext())
+
+            {
+                db.Guilds.Update(guild);
+                db.SaveChanges();
+            }
+            Console.WriteLine("Update cop");
+
+            ShowGuilds();
+        }
+
+        public static void ShowGuilds()
         {
             using (AppDbContext db = new AppDbContext())
             {
-                var guild = db.Guilds.Single(g => g.GuildName == "T1");
-
-                guild.GuildName = "DWM";
-
-                db.SaveChanges();
+                foreach (var guild in db.Guilds.MapGuildToDto().ToList())
+                {
+                    Console.WriteLine($"GuildId({guild.GuildId}) GuildName({guild.Name}) MemberCount({guild.MemberCount})");
+                }
             }
         }
     }
