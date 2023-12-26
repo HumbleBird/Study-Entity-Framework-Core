@@ -41,4 +41,11 @@ namespace MMO_EFCore
         public ICollection<Player> Members { get; set; }
 
     }
+
+    // DTO (Data Tranfer Object)
+    public class GuildDto
+    {
+        public string Name { get; set; }
+        public int MemberCount { get; set; }
+    }
 }
