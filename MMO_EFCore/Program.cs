@@ -13,8 +13,7 @@ namespace MMO_EFCore
 
             Console.WriteLine("[0] ForceRest");
             Console.WriteLine("[1] ResetALL");
-            Console.WriteLine("[2] UpdateDate");
-            Console.WriteLine("[3] Delete");
+            Console.WriteLine("[2] ShowItems");
 
             while (true)
             {
@@ -29,10 +28,9 @@ namespace MMO_EFCore
                        DbCommandscs.ReadAll();
                         break;
                     case "2":
-                       DbCommandscs.UpdateDate();
+                       DbCommandscs.ShowItems();
                         break;
                     case "3":
-                       DbCommandscs.DeleteItem();
                         break;
                 }
             }

@@ -16,7 +16,8 @@ namespace MMO_EFCore
         public DateTime CreatedDate { get; set; }
 
         // 다른 클래스 참조 -> FK (Navigational Property)
-        public int OwerId { get; set; }
+        //public int OwerId { get; set; }
+        [ForeignKey("OwnerId")]
         public Player Owner { get; set; }
     }
 
@@ -26,5 +27,7 @@ namespace MMO_EFCore
         // 이름Id -> PK
         public int PlayerId {  get; set; }
         public string Name { get; set; }
+
+        public Item Item { get; set; }
     }
 }

@@ -11,6 +11,7 @@ namespace MMO_EFCore
     {
         // DbSet<Item> -> EF Core한테 알려준다.
         public DbSet<Item> Items { get; set; }
+        public DbSet<Player> Players { get; set; }
 
         //public const string ConnectionString = @"Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=EfCoreDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
         public const string ConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=EfCoreDb;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
