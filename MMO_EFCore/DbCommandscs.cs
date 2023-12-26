@@ -32,6 +32,8 @@ namespace MMO_EFCore
             var Faker = new Player(){ Name = "Faker" };
             var deft = new Player(){ Name = "Deft" };
 
+            Console.WriteLine(db.Entry(Rookiss).State);
+
             List<Item> items = new List<Item>()
             {
                 new Item()
@@ -62,67 +64,13 @@ namespace MMO_EFCore
 
             db.Items.AddRange(items);
             db.Guilds.Add(guild);
+
+            Console.WriteLine(db.Entry(Rookiss).State);
+
             db.SaveChanges();
+
+            Console.WriteLine(db.Entry(Rookiss).State);
         }
 
-        public static void EagerLoading()
-        {
-            Console.WriteLine("길드 이름을 입력하세요");
-            Console.Write(" > ");
-            string name = Console.ReadLine();
-
-            using (var db = new AppDbContext())
-            {
-                Guild guild = db.Guilds.AsNoTracking().Where(g => g.GuildName == name).Include(g => g.Members).ThenInclude(p => p.Item).First();
-
-                foreach (Player player in guild.Members)
-                {
-                    Console.WriteLine($"ItemId({player.Item.TemplateId}) Owner({player.Name})");
-                }
-            }
-        }
-
-        public static void ExplicitLoading()
-        {
-            Console.WriteLine("길드 이름을 입력하세요");
-            Console.Write(" > ");
-            string name = Console.ReadLine();
-
-            using (var db = new AppDbContext())
-            {
-                Guild guild = db.Guilds.
-                    Where(g => g.GuildName == name).
-                    First();
-
-                db.Entry(guild).Collection(g => g.Members).Load();
-
-                foreach (Player player in guild.Members)
-                {
-                    db.Entry(player).Reference(p => p.Item).Load();
-                }
-
-                foreach (Player player in guild.Members)
-                {
-                    Console.WriteLine($"ItemId({player.Item.TemplateId}) Owner({player.Name})");
-                }
-            }
-        }
-
-        public static void SelectLoading()
-        {
-            Console.WriteLine("길드 이름을 입력하세요");
-            Console.Write(" > ");
-            string name = Console.ReadLine();
-
-            using (var db = new AppDbContext())
-            {
-                var info = db.Guilds.
-                    Where(g => g.GuildName == name).
-                    MapGuildToDto().
-                    First();
-
-                Console.WriteLine($"GuildName({info.Name}), MemberCount({info.MemberCount})");
-            }
-        }
     }
 }
