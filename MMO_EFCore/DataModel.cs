@@ -22,6 +22,7 @@ namespace MMO_EFCore
     }
 
     // 클래스 이름 = 테이블 이름 = Player
+    [Table("Player")]
     public class Player
     {
         // 이름Id -> PK
@@ -29,5 +30,15 @@ namespace MMO_EFCore
         public string Name { get; set; }
 
         public Item Item { get; set; }
+        public Guild Guild { get; set; }
+    }
+
+    [Table("Guild")]
+    public class Guild
+    {
+        public int GuildId { get; set; }
+        public string GuildName { get; set; }
+        public ICollection<Player> Members { get; set; }
+
     }
 }

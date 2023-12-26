@@ -28,10 +28,9 @@ namespace MMO_EFCore
 
         public static void CreateTestData(AppDbContext db)
         {
-            var player = new Player()
-            {
-                Name = "Rookiss"
-            };
+            var Rookiss = new Player(){ Name = "Rookiss"};
+            var Faker = new Player(){ Name = "Faker" };
+            var deft = new Player(){ Name = "Deft" };
 
             List<Item> items = new List<Item>()
             {
@@ -39,55 +38,95 @@ namespace MMO_EFCore
                 {
                     TemplateId = 101,
                     CreatedDate = DateTime.Now,
-                    Owner = player
+                    Owner = Rookiss
                 },
                 new Item()
                 {
                     TemplateId = 102,
                     CreatedDate = DateTime.Now,
-                    Owner = player
+                    Owner = Faker
                 },
                 new Item()
                 {
                     TemplateId = 103,
                     CreatedDate = DateTime.Now,
-                    Owner = new Player() {Name = "Fake"}
+                    Owner = deft
                 },
             };
 
+            Guild guild = new Guild()
+            {
+                GuildName = "T1",
+                Members = new List<Player>() { Rookiss, Faker, deft }
+            };
+
             db.Items.AddRange(items);
+            db.Guilds.Add(guild);
             db.SaveChanges();
         }
 
-        public static void ReadAll()
+        public static void EagerLoading()
         {
+            Console.WriteLine("길드 이름을 입력하세요");
+            Console.Write(" > ");
+            string name = Console.ReadLine();
+
             using (var db = new AppDbContext())
             {
-                // AsNoTracking : ReadOnly 
-                // Include : Eager Loading (즉시 로딩)
-                foreach(Item item in db.Items.AsNoTracking().Include(i=> i.Owner))
+                Guild guild = db.Guilds.AsNoTracking().Where(g => g.GuildName == name).Include(g => g.Members).ThenInclude(p => p.Item).First();
+
+                foreach (Player player in guild.Members)
                 {
-                    Console.WriteLine($"TemplatedId({item.TemplateId}) Owner({item.Owner.Name}) Created({item.CreatedDate})");
+                    Console.WriteLine($"ItemId({player.Item.TemplateId}) Owner({player.Name})");
                 }
             }
         }
 
-        public static void ShowItems()
+        public static void ExplicitLoading()
         {
-            Console.WriteLine("플레이어 이름을 입력하세요");
+            Console.WriteLine("길드 이름을 입력하세요");
             Console.Write(" > ");
             string name = Console.ReadLine();
 
-            //using (var db = new AppDbContext())
-            //{
-            //    foreach(Player player in  db.Players.AsNoTracking().Where(p => p.Name == name).Include(p=>p.Items))
-            //    {
-            //        foreach(Item item in player.Items)
-            //        {
-            //            Console.WriteLine($"{item.TemplateId}");
-            //        }
-            //    }
-            //}
+            using (var db = new AppDbContext())
+            {
+                Guild guild = db.Guilds.
+                    Where(g => g.GuildName == name).
+                    First();
+
+                db.Entry(guild).Collection(g => g.Members).Load();
+
+                foreach (Player player in guild.Members)
+                {
+                    db.Entry(player).Reference(p => p.Item).Load();
+                }
+
+                foreach (Player player in guild.Members)
+                {
+                    Console.WriteLine($"ItemId({player.Item.TemplateId}) Owner({player.Name})");
+                }
+            }
+        }
+
+        public static void SelectLoading()
+        {
+            Console.WriteLine("길드 이름을 입력하세요");
+            Console.Write(" > ");
+            string name = Console.ReadLine();
+
+            using (var db = new AppDbContext())
+            {
+                var info = db.Guilds.
+                    Where(g => g.GuildName == name).
+                    Select(g => new
+                    {
+                        Name = g.GuildName,
+                        MemberCount = g.Members.Count
+                    }).
+                    First();
+
+                Console.WriteLine($"GuildName({info.Name}), MemberCount({info.MemberCount})");
+            }
         }
     }
 }
