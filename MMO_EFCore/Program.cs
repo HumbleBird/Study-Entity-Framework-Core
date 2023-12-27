@@ -25,10 +25,9 @@ namespace MMO_EFCore
                        DbCommandscs.InitializeDB(true);
                         break;
                     case "1":
-                       DbCommandscs.UpdateReload();
+                       DbCommandscs.Test();
                         break;
                     case "2":
-                       DbCommandscs.UpdateFull();
                         break;
                     case "3":
                         break;

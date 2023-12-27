@@ -17,7 +17,8 @@ namespace MMO_EFCore
 
         // 다른 클래스 참조 -> FK (Navigational Property)
         //public int OwerId { get; set; }
-        [ForeignKey("OwnerId")]
+        //[ForeignKey("OwnerId")]
+        public int? OwnerId { get; set; }
         public Player Owner { get; set; }
     }
 

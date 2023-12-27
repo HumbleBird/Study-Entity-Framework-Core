@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -70,60 +71,37 @@ namespace MMO_EFCore
 
         }
 
-        public static void UpdateReload()
+        public static void Test()
         {
-            ShowGuilds();
+            ShowItems();
 
-            Console.WriteLine("Input GuildId");
+            Console.WriteLine("Input delete Playerid");
             Console.WriteLine(" > ");
             int id = int.Parse(Console.ReadLine());
 
-            Console.WriteLine("Input GuildName");
-            Console.WriteLine(" > ");
-            string name = Console.ReadLine();
-
-            using (AppDbContext db = new AppDbContext())
+            using (AppDbContext  db = new AppDbContext())
             {
-                Guild guild = db.Find<Guild>(id);
-                guild.GuildName = name;
+                Player player =  db.Players
+                    .Include(p => p.Item)
+                    .Single(p => p.PlayerId == id);
 
+                db.Players.Remove(player);
                 db.SaveChanges();
             }
-            Console.WriteLine("Update cop");
 
-            ShowGuilds();
+            Console.WriteLine("Test Complete");
+            ShowItems();
         }
-
-        public static string MakeUpdateJsonStr()
-        {
-            var jsonStr = "{\"GuildId\":1, \"GuildName\":\"Hellow\", \"Members\":null}";
-            return jsonStr;
-        }
-
-        public static void UpdateFull()
-        {
-            ShowGuilds();
-
-            string jsonStr = MakeUpdateJsonStr();
-            Guild guild = JsonConvert.DeserializeObject<Guild>(jsonStr);
-            using (AppDbContext db = new AppDbContext())
-
-            {
-                db.Guilds.Update(guild);
-                db.SaveChanges();
-            }
-            Console.WriteLine("Update cop");
-
-            ShowGuilds();
-        }
-
-        public static void ShowGuilds()
+        public static void ShowItems()
         {
             using (AppDbContext db = new AppDbContext())
             {
-                foreach (var guild in db.Guilds.MapGuildToDto().ToList())
+                foreach (var item in db.Items.Include(i => i.Owner).ToList())
                 {
-                    Console.WriteLine($"GuildId({guild.GuildId}) GuildName({guild.Name}) MemberCount({guild.MemberCount})");
+                    if (item.Owner == null)
+                        Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner(0)");
+                    else
+                        Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner({item.Owner.PlayerId}) Owner({item.Owner})");
                 }
             }
         }
