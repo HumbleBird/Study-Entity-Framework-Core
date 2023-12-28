@@ -71,11 +71,38 @@ namespace MMO_EFCore
 
         }
 
-        public static void Test()
+        public static void Update_1vM()
+        {
+            ShowGuild();
+
+            Console.WriteLine("Input ItemSwitch Playerid");
+            Console.WriteLine(" > ");
+            int id = int.Parse(Console.ReadLine());
+
+            using (AppDbContext  db = new AppDbContext())
+            {
+                Guild guild = db.Guilds
+                    .Include(g => g.Members)
+                    .Single(g => g.GuildId == id);
+
+
+                guild.Members.Add(new Player()
+                {
+                    Name = "Dopa"
+                });
+
+                db.SaveChanges();
+            }
+
+            Console.WriteLine("Test Complete");
+            ShowGuild();
+        }
+
+        public static void Update_1v1()
         {
             ShowItems();
 
-            Console.WriteLine("Input delete Playerid");
+            Console.WriteLine("Input ItemSwitch Playerid");
             Console.WriteLine(" > ");
             int id = int.Parse(Console.ReadLine());
 
@@ -85,13 +112,25 @@ namespace MMO_EFCore
                     .Include(p => p.Item)
                     .Single(p => p.PlayerId == id);
 
-                db.Players.Remove(player);
+                if( player.Item != null)
+                {
+                    player.Item.TemplateId = 888;
+                    player.Item.CreatedDate = DateTime.Now;
+                }
+
+                player.Item = new Item()
+                {
+                    TemplateId = 777,
+                    CreatedDate = DateTime.Now
+                };
+
                 db.SaveChanges();
             }
 
             Console.WriteLine("Test Complete");
             ShowItems();
         }
+
         public static void ShowItems()
         {
             using (AppDbContext db = new AppDbContext())
@@ -102,6 +141,17 @@ namespace MMO_EFCore
                         Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner(0)");
                     else
                         Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner({item.Owner.PlayerId}) Owner({item.Owner})");
+                }
+            }
+        }
+
+        public static void ShowGuild()
+        {
+            using (AppDbContext db = new AppDbContext())
+            {
+                foreach (var guild in db.Guilds.Include(i => i.Members).ToList())
+                {
+                    Console.WriteLine($"guildId({guild.GuildId}) guildName({guild.GuildName}) MemberCount({guild.MapGuildToDto()})");
                 }
             }
         }
