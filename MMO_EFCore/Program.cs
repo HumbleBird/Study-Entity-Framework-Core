@@ -12,8 +12,7 @@ namespace MMO_EFCore
             Console.WriteLine("명령어를 입력하세요");
 
             Console.WriteLine("[0] ForceRest");
-            Console.WriteLine("[1] Update 1v1");
-            Console.WriteLine("[2] Update 1vM");
+            Console.WriteLine("[1] Test Delete");
 
             while (true)
             {
@@ -25,7 +24,7 @@ namespace MMO_EFCore
                        DbCommandscs.InitializeDB(true);
                         break;
                     case "1":
-                       DbCommandscs.Update_1v1();
+                       DbCommandscs.TestDelete();
                         break;
                     case "2":
                         break;

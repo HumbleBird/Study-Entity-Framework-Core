@@ -71,76 +71,28 @@ namespace MMO_EFCore
 
         }
 
-        public static void Update_1vM()
-        {
-            ShowGuild();
 
-            Console.WriteLine("Input ItemSwitch Playerid");
-            Console.WriteLine(" > ");
-            int id = int.Parse(Console.ReadLine());
-
-            using (AppDbContext  db = new AppDbContext())
-            {
-                Guild guild = db.Guilds
-                    .Include(g => g.Members)
-                    .Single(g => g.GuildId == id);
-
-
-                guild.Members.Add(new Player()
-                {
-                    Name = "Dopa"
-                });
-
-                db.SaveChanges();
-            }
-
-            Console.WriteLine("Test Complete");
-            ShowGuild();
-        }
-
-        public static void Update_1v1()
-        {
-            ShowItems();
-
-            Console.WriteLine("Input ItemSwitch Playerid");
-            Console.WriteLine(" > ");
-            int id = int.Parse(Console.ReadLine());
-
-            using (AppDbContext  db = new AppDbContext())
-            {
-                Player player =  db.Players
-                    .Include(p => p.Item)
-                    .Single(p => p.PlayerId == id);
-
-                if( player.Item != null)
-                {
-                    player.Item.TemplateId = 888;
-                    player.Item.CreatedDate = DateTime.Now;
-                }
-
-                player.Item = new Item()
-                {
-                    TemplateId = 777,
-                    CreatedDate = DateTime.Now
-                };
-
-                db.SaveChanges();
-            }
-
-            Console.WriteLine("Test Complete");
-            ShowItems();
-        }
 
         public static void ShowItems()
         {
             using (AppDbContext db = new AppDbContext())
             {
-                foreach (var item in db.Items.Include(i => i.Owner).ToList())
+                foreach (var item in db.Items.Include(i => i.Owner).IgnoreQueryFilters().ToList())
                 {
-                    if (item.Owner == null)
-                        Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner(0)");
+                    if(item.SoftDeleted)
+                    {
+                        Console.WriteLine($"Deleted ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner({item.Owner.PlayerId}) Owner({item.Owner})");
+
+                    }
                     else
-                        Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner({item.Owner.PlayerId}) Owner({item.Owner})");
+                    {
+                        if (item.Owner == null)
+                            Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner(0)");
+                        else
+                            Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner({item.Owner.PlayerId}) Owner({item.Owner})");
+                    }
+
+                    
                 }
             }
         }
@@ -151,9 +103,29 @@ namespace MMO_EFCore
             {
                 foreach (var guild in db.Guilds.Include(i => i.Members).ToList())
                 {
-                    Console.WriteLine($"guildId({guild.GuildId}) guildName({guild.GuildName}) MemberCount({guild.MapGuildToDto()})");
+                    Console.WriteLine($"guildId({guild.GuildId}) guildName({guild.GuildName}) MemberCount()");
                 }
             }
+        }
+
+        public static void TestDelete()
+        {
+            ShowItems();
+
+            Console.WriteLine("Select Delete ItemId");
+            Console.WriteLine(" > ");
+            int id = int.Parse( Console.ReadLine() );
+
+            using (AppDbContext db = new AppDbContext())
+            {
+                Item item = db.Items.Find(id);
+                //db.Items.Remove(item);
+                item.SoftDeleted = true;
+                db.SaveChanges();
+            }
+
+            Console.WriteLine("Test Complete");
+            ShowItems();
         }
     }
 }
