@@ -23,6 +23,9 @@ namespace MMO_EFCore
         //[ForeignKey("OwnerId")]
         public int? OwnerId { get; set; }
         public Player Owner { get; set; }
+
+        public int? CreateId { get; set; }
+        public Player Creator { get; set; }
     }
 
     // 클래스 이름 = 테이블 이름 = Player
@@ -36,7 +39,11 @@ namespace MMO_EFCore
         [MaxLength(20)]
         public string Name { get; set; }
 
-        public Item Item { get; set; }
+        [InverseProperty("Owner")]
+        public Item OwnedItem { get; set; }
+        [InverseProperty("Createor")]
+        public ICollection<Item> CreateItems { get; set; }
+
         public Guild Guild { get; set; }
     }
 
