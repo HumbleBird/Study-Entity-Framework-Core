@@ -26,6 +26,11 @@ namespace MMO_EFCore
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Item>().HasQueryFilter(i => i.SoftDeleted == false);
+
+            modelBuilder.Entity<Player>()
+                .HasIndex(p => p.Name)
+                .HasName("Index_Person_Name")
+                .IsUnique();
         }
     }
 }
