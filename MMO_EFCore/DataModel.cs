@@ -8,57 +8,19 @@ using System.Text;
 
 namespace MMO_EFCore
 {
-    // 오늘의 주제 : Entity <-> DB Table 연동하는 다양한 방법들
-    // Entity Class 하나를 통으로 Read/Write -> 부담 (Select Loading, DTO)
+    // 오늘의 주제 : Backing Field + Relationship
 
-    // 1) Owned Type
-    // - 일반 Class를 Entity Class에 추가하는 개념
-    // a) 동일한 테이블 추가
-    // - .OwnsOne()
-    // - Relationship이 아닌 Ownership의 개념이기 때문에, .Include()
-    // b) 다른 테이블에 추가
-    // - .OwnsOne().ToTable()
-
-    // 2) Table Per Hierarchy (TPH)
-    // - 상속 관계의 여러 class <-> 하나의 테이블에 매핑
-    // ex) Dog, Cat, Bird, Animal
-    // a) Convention
-    // - 일단 class 상속받아 만들고, DbSet 추가
-    // - Discriminator ?
-    // b) Fluent Api
-    // - .HasDiscriminator().HasValue()
-
-    // 3) Table Splitting
-    // - 다수의 Entity Class <-> 하나의 테이블에 매핑
-
-    public class ItemOption
+    public class ItemReview
     {
-        public int Str { get; set; }
-        public int Dex { get; set; }
-        public int Hp { get; set; }
-    }
+        public int ItemReviewId { get; set; }
+        public int Score { get; set; }
 
-    public class ItemDetail
-    {
-        public int ItemDetailId { get; set; }
-        public string Description { get; set; }
-    }
-
-    public enum ItemType
-    {
-        NormalItem,
-        EventItem
     }
 
     [Table("Item")]
     public class Item
     {
-        public ItemType Type { get; set; }
         public bool SoftDeleted { get; set; }
-
-        public ItemOption Option { get; set; }
-
-        public ItemDetail Detail { get; set; }
 
         // 이름Id -> PK
         public int ItemId { get; set; }
@@ -69,14 +31,30 @@ namespace MMO_EFCore
 
         public int OwnerId { get; set; }
         public Player Owner { get; set; }
+
+
+        public double? AverageScore { get; set; }
+
+        private readonly List<ItemReview> _reviews = new List<ItemReview>();
+        public IEnumerable<ItemReview> Reviews
+        {
+            get { return _reviews.ToList(); }
+        }
+
+        public void AddReview(ItemReview itemReview)
+        {
+            _reviews.Add(itemReview);
+            AverageScore = _reviews.Average(r => r.Score);
+        }
+
+        public void RemoveReview(ItemReview itemReview) 
+        {
+            _reviews.Remove(itemReview);
+            AverageScore = _reviews.Any() ? _reviews.Average(r => r.Score) : (double?)null;
+        }
     }
 
-    public class EventItem : Item
-    {
-        public DateTime DestroyDate { get; set; }
-    }
-
-    // Entity 클래스 이름 = 테이블 이름 = Player	
+        // Entity 클래스 이름 = 테이블 이름 = Player	
     [Table("Player")]
     public class Player
     {
