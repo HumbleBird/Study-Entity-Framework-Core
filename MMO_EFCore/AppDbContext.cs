@@ -51,10 +51,6 @@ namespace MMO_EFCore
             builder.Entity<Item>()
                 .Property("CreateDate")
                 .HasDefaultValueSql("GETDATE()");
-
-            builder.Entity<Player>()
-                .Property(p => p.Name)
-                .HasValueGenerator((p, e) => new PlayerNameGenerator());
         }
     }
 }

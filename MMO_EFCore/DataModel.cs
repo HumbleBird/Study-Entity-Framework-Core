@@ -20,23 +20,14 @@ namespace MMO_EFCore
         public int TemplateId { get; set; } // 101 = 집행검
         public DateTime CreateDate { get; private set; }
 
+        public int Itemgrade { get; set; }
+
         // 다른 클래스 참조 -> FK (Navigational Property)
 
         public int OwnerId { get; set; }
         public Player Owner { get; set; }
-
     }
 
-    public class PlayerNameGenerator : ValueGenerator<string>
-    {
-        public override bool GeneratesTemporaryValues => false;
-
-        public override string Next(EntityEntry entry)
-        {
-            string name = $"Player_{DateTime.Now.ToString("yyyyMMdd")}";
-            return name;
-        }
-    }
 
     // Entity 클래스 이름 = 테이블 이름 = Player	
     [Table("Player")]
