@@ -86,6 +86,31 @@ namespace MMO_EFCore
             db.Guilds.Add(guild);
 
             db.SaveChanges();
+
+            // Add Test
+            {
+                Item item = new Item()
+                {
+                    TemplateId = 500,
+                    Owner = rookiss
+                };
+                db.Items.Add(item);
+                Console.WriteLine("2번)" + db.Entry(rookiss).State);
+            }
+
+            // Delete Test
+            {
+                Player p = db.Players.First();
+
+                p.Guild = new Guild() { GuildName = "DD" };
+                p.OwnedItem = items[0];
+                db.Players.Remove(p);
+
+                Console.WriteLine("3번)" + db.Entry(p).State);
+                Console.WriteLine("4번)" + db.Entry(p.Guild).State);
+                Console.WriteLine("5번)" + db.Entry(p.OwnedItem).State);
+
+            }
         }
 
         public static void ShowItems()
