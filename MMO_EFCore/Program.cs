@@ -1,10 +1,15 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace MMO_EFCore
 {
     class Program
     {
-
+        [DbFunction()]
+        public static double? GetAverageReviewScore(int itemId)
+        {
+            throw new NotImplementedException("사용 금지!");
+        }
 
         static void Main(string[] args)
         {
@@ -14,6 +19,7 @@ namespace MMO_EFCore
             Console.WriteLine("명령어를 입력하세요");
             Console.WriteLine("[0] Force Reset");
             Console.WriteLine("[1] ShowItems");
+            Console.WriteLine("[1] CalcAverage");
 
             while (true)
             {
@@ -28,6 +34,7 @@ namespace MMO_EFCore
                         DbCommands.ShowItems();
                         break;
                     case "2":
+                        DbCommands.CalcAverage();
                         break;
                     case "3":
                         break;

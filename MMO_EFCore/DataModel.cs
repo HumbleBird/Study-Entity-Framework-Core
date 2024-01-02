@@ -8,7 +8,6 @@ using System.Text;
 
 namespace MMO_EFCore
 {
-    // 오늘의 주제 : Backing Field + Relationship
 
     public class ItemReview
     {
@@ -32,26 +31,7 @@ namespace MMO_EFCore
         public int OwnerId { get; set; }
         public Player Owner { get; set; }
 
-
-        public double? AverageScore { get; set; }
-
-        private readonly List<ItemReview> _reviews = new List<ItemReview>();
-        public IEnumerable<ItemReview> Reviews
-        {
-            get { return _reviews.ToList(); }
-        }
-
-        public void AddReview(ItemReview itemReview)
-        {
-            _reviews.Add(itemReview);
-            AverageScore = _reviews.Average(r => r.Score);
-        }
-
-        public void RemoveReview(ItemReview itemReview) 
-        {
-            _reviews.Remove(itemReview);
-            AverageScore = _reviews.Any() ? _reviews.Average(r => r.Score) : (double?)null;
-        }
+        public ICollection<ItemReview> Reviews { get; set; }
     }
 
         // Entity 클래스 이름 = 테이블 이름 = Player	
