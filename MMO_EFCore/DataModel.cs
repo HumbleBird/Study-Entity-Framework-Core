@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,14 +10,6 @@ using System.Text;
 
 namespace MMO_EFCore
 {
-
-    public class ItemReview
-    {
-        public int ItemReviewId { get; set; }
-        public int Score { get; set; }
-
-    }
-
     [Table("Item")]
     public class Item
     {
@@ -24,17 +18,27 @@ namespace MMO_EFCore
         // 이름Id -> PK
         public int ItemId { get; set; }
         public int TemplateId { get; set; } // 101 = 집행검
-        public DateTime CreateDate { get; set; }
+        public DateTime CreateDate { get; private set; }
 
         // 다른 클래스 참조 -> FK (Navigational Property)
 
         public int OwnerId { get; set; }
         public Player Owner { get; set; }
 
-        public ICollection<ItemReview> Reviews { get; set; }
     }
 
-        // Entity 클래스 이름 = 테이블 이름 = Player	
+    public class PlayerNameGenerator : ValueGenerator<string>
+    {
+        public override bool GeneratesTemporaryValues => false;
+
+        public override string Next(EntityEntry entry)
+        {
+            string name = $"Player_{DateTime.Now.ToString("yyyyMMdd")}";
+            return name;
+        }
+    }
+
+    // Entity 클래스 이름 = 테이블 이름 = Player	
     [Table("Player")]
     public class Player
     {

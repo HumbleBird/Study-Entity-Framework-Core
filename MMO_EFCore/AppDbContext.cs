@@ -44,7 +44,17 @@ namespace MMO_EFCore
                 .HasName("Index_Person_Name")
                 .IsUnique();
 
-            builder.HasDbFunction(() => Program.GetAverageReviewScore(0));
+            //builder.Entity<Item>()
+            //    .Property("CreateDate")
+            //    .HasDefaultValue(DateTime.Now);
+
+            builder.Entity<Item>()
+                .Property("CreateDate")
+                .HasDefaultValueSql("GETDATE()");
+
+            builder.Entity<Player>()
+                .Property(p => p.Name)
+                .HasValueGenerator((p, e) => new PlayerNameGenerator());
         }
     }
 }
