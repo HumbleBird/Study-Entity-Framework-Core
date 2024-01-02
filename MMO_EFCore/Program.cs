@@ -1,30 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
-using System;
+﻿using System;
 
 namespace MMO_EFCore
 {
     class Program
     {
-        static void Main(string[] arge)
+
+
+        static void Main(string[] args)
         {
+            DbCommands.InitializeDB(forceReset: false);
 
+            // CRUD (Create-Read-Update-Delete)
             Console.WriteLine("명령어를 입력하세요");
-
-            Console.WriteLine("[0] ForceRest");
-            Console.WriteLine("[1] Test Delete");
+            Console.WriteLine("[0] Force Reset");
+            Console.WriteLine("[1] ShowItems");
 
             while (true)
             {
-                Console.WriteLine("> ");
+                Console.Write("> ");
                 string command = Console.ReadLine();
                 switch (command)
                 {
                     case "0":
-                       DbCommandscs.InitializeDB(true);
+                        DbCommands.InitializeDB(forceReset: true);
                         break;
                     case "1":
-                       DbCommandscs.TestDelete();
+                        DbCommands.ShowItems();
                         break;
                     case "2":
                         break;

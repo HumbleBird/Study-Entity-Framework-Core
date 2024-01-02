@@ -1,24 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace MMO_EFCore
 {
-    public class DbCommandscs
+    // 오늘의 주제 : State (상태)
+    // 0) Detached (No Tracking ! 추적되지 않는 상태. SaveChanges를 해도 존재도 모름)
+    // 1) Unchanged (DB에 있고, 딱히 수정사항도 없었음. SaveChanges를 해도 아무 것도 X)
+    // 2) Deleted (DB에는 아직 있지만, 삭제되어야 함. SaveChanges로 DB에 적용)
+    // 3) Modified (DB에 있고, 클라에서 수정된 상태. SaveChanges로 DB에 적용)
+    // 4) Added (DB에는 아직 없음. SaveChanges로 DB에 적용)
+
+    public class DbCommands
     {
-        public static void InitializeDB(bool foreceReset = false)
+        // 초기화 시간이 좀 걸림
+        public static void InitializeDB(bool forceReset = false)
         {
             using (AppDbContext db = new AppDbContext())
             {
-                if (!foreceReset && (db.GetService<IDatabaseCreator>() as RelationalDatabaseCreator).Exists())
+                if (!forceReset && (db.GetService<IDatabaseCreator>() as RelationalDatabaseCreator).Exists())
                     return;
 
                 db.Database.EnsureDeleted();
@@ -31,75 +36,85 @@ namespace MMO_EFCore
 
         public static void CreateTestData(AppDbContext db)
         {
-            var Rookiss = new Player(){ Name = "Rookiss"};
-            var Faker = new Player(){ Name = "Faker" };
-            var deft = new Player(){ Name = "Deft" };
+            var rookiss = new Player() { Name = "Rookiss" };
+            var faker = new Player() { Name = "Faker" };
+            var deft = new Player() { Name = "Deft" };
 
             List<Item> items = new List<Item>()
             {
                 new Item()
                 {
                     TemplateId = 101,
-                    CreatedDate = DateTime.Now,
-                    Owner = Rookiss
+                    CreateDate = DateTime.Now,
+                    Owner = rookiss
                 },
-                new Item()
+                new EventItem()
                 {
                     TemplateId = 102,
-                    CreatedDate = DateTime.Now,
-                    Owner = Faker
+                    CreateDate = DateTime.Now,
+                    Owner = faker,
+                    DestroyDate = DateTime.Now
                 },
                 new Item()
                 {
                     TemplateId = 103,
-                    CreatedDate = DateTime.Now,
+                    CreateDate = DateTime.Now,
                     Owner = deft
-                },
+                }
             };
 
+            // Test Owned Type
+            items[0].Option = new ItemOption() { Dex = 1, Hp = 2, Str = 3 };
 
-            // Test Shadow Property Value Write
-            db.Entry(items[0]).Property("RecoveredDate").CurrentValue = DateTime.Now;
+            items[2].Detail = new ItemDetail()
+            {
+                Description = "This is good item"
+            };
 
-            // Test Backing Field
-            items[0].SetOption
 
             Guild guild = new Guild()
             {
                 GuildName = "T1",
-                Members = new List<Player>() { Rookiss, Faker, deft }
+                Members = new List<Player>() { rookiss, faker, deft }
             };
 
             db.Items.AddRange(items);
             db.Guilds.Add(guild);
 
-
             db.SaveChanges();
-
         }
-
-
 
         public static void ShowItems()
         {
             using (AppDbContext db = new AppDbContext())
             {
-                foreach (var item in db.Items.Include(i => i.Owner).IgnoreQueryFilters().ToList())
+                foreach (var item in db.Items.Include(i => i.Owner).Include(i => i.Detail).IgnoreQueryFilters().ToList())
                 {
-                    if(item.SoftDeleted)
+                    if (item.SoftDeleted)
                     {
-                        Console.WriteLine($"Deleted ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner({item.Owner.PlayerId}) Owner({item.Owner})");
-
+                        Console.WriteLine($"DELETED - ItemId({item.ItemId}) TemplateId({item.TemplateId})");
                     }
                     else
                     {
+                        // Test Owned Type
+                        if (item.Option != null)
+                            Console.WriteLine("STR " + item.Option.Str);
+
+                        // Test TPH
+                        //item.Type == ItemType.EventItem
+                        EventItem eventItem = item as EventItem;
+                        if (eventItem != null)
+                            Console.WriteLine("DestroyDate: " + eventItem.DestroyDate);
+
+                        // Test Table Splitting
+                        if (item.Detail != null)
+                            Console.WriteLine(item.Detail.Description);
+
                         if (item.Owner == null)
                             Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner(0)");
                         else
-                            Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) Owner({item.Owner.PlayerId}) Owner({item.Owner})");
+                            Console.WriteLine($"ItemId({item.ItemId}) TemplateId({item.TemplateId}) OwnerId({item.Owner.PlayerId}) Owner({item.Owner.Name})");
                     }
-
-                    
                 }
             }
         }
@@ -108,31 +123,11 @@ namespace MMO_EFCore
         {
             using (AppDbContext db = new AppDbContext())
             {
-                foreach (var guild in db.Guilds.Include(i => i.Members).ToList())
+                foreach (var guild in db.Guilds.Include(g => g.Members).ToList())
                 {
-                    Console.WriteLine($"guildId({guild.GuildId}) guildName({guild.GuildName}) MemberCount()");
+                    Console.WriteLine($"GuildId({guild.GuildId}) GuildName({guild.GuildName}) MemberCount({guild.Members.Count})");
                 }
             }
-        }
-
-        public static void TestDelete()
-        {
-            ShowItems();
-
-            Console.WriteLine("Select Delete ItemId");
-            Console.WriteLine(" > ");
-            int id = int.Parse( Console.ReadLine() );
-
-            using (AppDbContext db = new AppDbContext())
-            {
-                Item item = db.Items.Find(id);
-                //db.Items.Remove(item);
-                item.SoftDeleted = true;
-                db.SaveChanges();
-            }
-
-            Console.WriteLine("Test Complete");
-            ShowItems();
         }
     }
 }
