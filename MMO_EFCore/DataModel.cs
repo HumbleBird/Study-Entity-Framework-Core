@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,9 +9,30 @@ using System.Threading.Tasks;
 
 namespace MMO_EFCore
 {
+    public struct ItemOption
+    {
+        public int str;
+        public int dex;
+        public int hp;
+    }
+
     [Table("Item")]
     public class Item
     {
+        private string _jsonData;
+        public string JsonData { get {return _jsonData ; } set {_jsonData = value; } }
+
+        public void SetOption(ItemOption option)
+        {
+            _jsonData = JsonConvert.SerializeObject(option);
+        }
+
+        public ItemOption GetOption()
+        {
+            return JsonConvert.DeserializeObject<ItemOption>(_jsonData);
+        }
+
+
         public bool SoftDeleted { get; set; }
 
         // 이름Id -> PK
