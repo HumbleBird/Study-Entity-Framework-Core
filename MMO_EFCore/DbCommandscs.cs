@@ -53,7 +53,7 @@ namespace MMO_EFCore
 
         public static void CreateTestData(AppDbContext db)
         {
-            var rookiss = new Player() {  };
+            var rookiss = new Player() { Name = "rr" };
             var faker = new Player() { Name = "Faker" };
             var deft = new Player() { Name = "Deft" };
 
@@ -63,16 +63,6 @@ namespace MMO_EFCore
                 {
                     TemplateId = 101,
                     Owner = rookiss
-                },
-                new Item()
-                {
-                    TemplateId = 102,
-                    Owner = faker,
-                },
-                new Item()
-                {
-                    TemplateId = 103,
-                    Owner = deft
                 }
             };
 
@@ -134,14 +124,38 @@ namespace MMO_EFCore
             }
         }
 
-        public static void ShowGuild()
+        public static void TestUpdateAttached()
         {
             using (AppDbContext db = new AppDbContext())
             {
-                foreach (var guild in db.Guilds.Include(g => g.Members).ToList())
+                // Update Test
                 {
-                    Console.WriteLine($"GuildId({guild.GuildId}) GuildName({guild.GuildName}) MemberCount({guild.Members.Count})");
+                    // Disconnected
+                    Player p = new Player();
+                    p.PlayerId = 2;
+                    p.Name = "FakeSpSpn";
+                    p.Guild = new Guild() { GuildName = "Update Guild" };
+
+
+                    Console.WriteLine("6번)" + db.Entry(p.Guild).State);
+                    db.Players.Update(p);
+                    Console.WriteLine("7번)" + db.Entry(p.Guild).State);
                 }
+
+                // attach Test
+                {
+                    Player p = new Player();
+                    p.PlayerId = 3;
+                    p.Name = "ddd";
+                    p.Guild = new Guild() { GuildName = "attach Guild" };
+
+                    Console.WriteLine("8번)" + db.Entry(p.Guild).State);
+                    db.Players.Attach(p);
+                    Console.WriteLine("9번)" + db.Entry(p.Guild).State);
+
+                }
+
+                db.SaveChanges();
             }
         }
 
