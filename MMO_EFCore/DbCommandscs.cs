@@ -99,45 +99,41 @@ namespace MMO_EFCore
             }
         }
 
-        public static void TestUpdateAttached()
+        public static void Test()
         {
             using (AppDbContext db = new AppDbContext())
             {
-                // State 조작
                 {
-                    Player p = new Player() { Name = "StateTest" };
-                    db.Entry(p).State = EntityState.Added;
-                    db.SaveChanges();
+                    string name = "rr";
+
+                    var list = db.Players
+                        .FromSqlRaw("select * from dbo.Player Where Name = {0}", name)
+                        .ToList();
+
+                    foreach (var p in list)
+                    {
+                        Console.WriteLine($"{p.Name} {p.PlayerId}");
+                    }
+
+                    var list2 = db.Players
+                        .FromSqlInterpolated($"select * from dbo.Player Where Name = {name}")
+                        .ToList();
+
+                    foreach (var p in list2)
+                    {
+                        Console.WriteLine($"{p.Name} {p.PlayerId}");
+                    }
                 }
 
+                // ExecuteSqlCommand (Non-Queary SQL) + Reload
                 {
-                    Player p = new Player()
-                    {
-                        PlayerId = 2,
-                        Name = "Fake_new"
-                    };
+                    Player p = db.Players.Single(p => p.Name == "Faker");
 
-                    p.OwnedItem = new Item() { TemplateId = 777 };
-                    p.Guild = new Guild() { GuildName = "TrackGraapGuild" };
+                    string prevName = "Faker";
+                    string afterName = "Faker_New";
+                    db.Database.ExecuteSqlInterpolated($"Update dbo.Player SET Name={afterName} Where Name={prevName}");
 
-                    db.ChangeTracker.TrackGraph(p, e =>
-                    {
-                        if(e.Entry.Entity is Player)
-                        {
-                            e.Entry.State = EntityState.Unchanged;
-                            e.Entry.Property("Name").IsModified = true;
-                        }
-                        else if (e.Entry.Entity is Guid)
-                        {
-                            e.Entry.State = EntityState.Unchanged;
-                        }
-                        else if (e.Entry.Entity is Item)
-                        {
-                            e.Entry.State = EntityState.Unchanged;
-                        }
-                    });
-
-                    db.SaveChanges();
+                    db.Entry(p).Reload();
                 }
 
 
