@@ -52,5 +52,22 @@ namespace MMO_EFCore
                 .Property("CreateDate")
                 .HasDefaultValueSql("GETDATE()");
         }
+
+        public override int SaveChanges()
+        {
+            var entities = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added);
+
+            foreach (var entity in entities)
+            {
+                ILogEntity tracked = entity.Entity as ILogEntity;
+                if (tracked != null)
+                {
+                    tracked.SetCreateTime();
+                }
+            }
+
+            return base.SaveChanges();
+        }
     }
 }

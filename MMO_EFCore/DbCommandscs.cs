@@ -76,31 +76,6 @@ namespace MMO_EFCore
             db.Guilds.Add(guild);
 
             db.SaveChanges();
-
-            // Add Test
-            {
-                Item item = new Item()
-                {
-                    TemplateId = 500,
-                    Owner = rookiss
-                };
-                db.Items.Add(item);
-                Console.WriteLine("2번)" + db.Entry(rookiss).State);
-            }
-
-            // Delete Test
-            {
-                Player p = db.Players.First();
-
-                p.Guild = new Guild() { GuildName = "DD" };
-                p.OwnedItem = items[0];
-                db.Players.Remove(p);
-
-                Console.WriteLine("3번)" + db.Entry(p).State);
-                Console.WriteLine("4번)" + db.Entry(p.Guild).State);
-                Console.WriteLine("5번)" + db.Entry(p.OwnedItem).State);
-
-            }
         }
 
         public static void ShowItems()
@@ -128,34 +103,44 @@ namespace MMO_EFCore
         {
             using (AppDbContext db = new AppDbContext())
             {
-                // Update Test
+                // State 조작
                 {
-                    // Disconnected
-                    Player p = new Player();
-                    p.PlayerId = 2;
-                    p.Name = "FakeSpSpn";
-                    p.Guild = new Guild() { GuildName = "Update Guild" };
-
-
-                    Console.WriteLine("6번)" + db.Entry(p.Guild).State);
-                    db.Players.Update(p);
-                    Console.WriteLine("7번)" + db.Entry(p.Guild).State);
+                    Player p = new Player() { Name = "StateTest" };
+                    db.Entry(p).State = EntityState.Added;
+                    db.SaveChanges();
                 }
 
-                // attach Test
                 {
-                    Player p = new Player();
-                    p.PlayerId = 3;
-                    p.Name = "ddd";
-                    p.Guild = new Guild() { GuildName = "attach Guild" };
+                    Player p = new Player()
+                    {
+                        PlayerId = 2,
+                        Name = "Fake_new"
+                    };
 
-                    Console.WriteLine("8번)" + db.Entry(p.Guild).State);
-                    db.Players.Attach(p);
-                    Console.WriteLine("9번)" + db.Entry(p.Guild).State);
+                    p.OwnedItem = new Item() { TemplateId = 777 };
+                    p.Guild = new Guild() { GuildName = "TrackGraapGuild" };
 
+                    db.ChangeTracker.TrackGraph(p, e =>
+                    {
+                        if(e.Entry.Entity is Player)
+                        {
+                            e.Entry.State = EntityState.Unchanged;
+                            e.Entry.Property("Name").IsModified = true;
+                        }
+                        else if (e.Entry.Entity is Guid)
+                        {
+                            e.Entry.State = EntityState.Unchanged;
+                        }
+                        else if (e.Entry.Entity is Item)
+                        {
+                            e.Entry.State = EntityState.Unchanged;
+                        }
+                    });
+
+                    db.SaveChanges();
                 }
 
-                db.SaveChanges();
+
             }
         }
 

@@ -28,10 +28,15 @@ namespace MMO_EFCore
         public Player Owner { get; set; }
     }
 
+    public interface ILogEntity
+    {
+        DateTime CreateTime { get; }
+        void SetCreateTime();
+    }
 
     // Entity 클래스 이름 = 테이블 이름 = Player	
     [Table("Player")]
-    public class Player
+    public class Player : ILogEntity
     {
         // 이름Id -> PK
         public int PlayerId { get; set; }
@@ -42,6 +47,13 @@ namespace MMO_EFCore
         public string Name { get; set; }
         public Item OwnedItem { get; set; }
         public Guild Guild { get; set; }
+
+        public DateTime CreateTime { get; private set; }
+
+        public void SetCreateTime()
+        {
+            CreateTime = DateTime.Now;
+        }
     }
 
     [Table("Guild")]
